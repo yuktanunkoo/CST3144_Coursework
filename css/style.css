@@ -1,0 +1,151 @@
+* {
+    margin: inherit;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 24px;
+}
+
+nav {
+    background: linear-gradient(164deg, rgba(131, 222, 194, 1) 40%, rgb(103, 207, 214) 60%);
+    font-family: Verdana;
+    padding: 25px;
+    text-align: right;
+}
+
+#searchbar{
+ position:absolute;
+ display: block;
+}
+
+button {
+    padding: 5px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    background-color: #83dec3;
+    font-size: 16px;
+    border-style: solid;
+    border-width: thin;
+    border-color: white;
+}
+
+button:hover {
+    color: #83dec3;
+    background-color: white;
+    border-color: #83dec3;
+}
+
+#cartBtn {
+    padding: 8px;
+}
+
+#cartBtn:hover {
+    background-color: white;
+    color: #83dec2cd;
+}
+
+#cartBtn:disabled {
+    color: white;
+    cursor: default;
+    background-color: grey;
+}
+
+#sortingForm select,
+option {
+    display: inline-block;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+#addToCartButton {
+    display: block;
+    padding: 10px;
+    width: 100%;
+}
+
+#addToCartButton:disabled {
+    color: #7b7a7a;
+    background-color: #ddd;
+    cursor: default;
+    border-color: white;
+}
+
+#checkOutBtn {
+    padding: 10px;
+    width: 180px;
+}
+
+#tuitionImg {
+    width: 80px;
+}
+
+#tuitionList {
+    display: inline-grid;
+    padding: 30px;
+    margin: auto;
+}
+
+#checkOutList {
+    display: inline-block;
+    position: relative;
+}
+
+table {
+    border-spacing: 0;
+    margin: 20px;
+}
+
+td {
+    text-align: center;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    width: 180px;
+    padding: 10px;
+
+}
+
+#checkOut_form {
+    display: inline-block;
+    position: sticky
+}
+
+
+
+label {
+    display: inline;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    text-align: left;
+    font-weight: bold;
+}
+
+input {
+    display: inline-block;
+    margin-bottom: 15px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#popUp {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#popUpContent {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    min-width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
