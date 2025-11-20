@@ -6,7 +6,7 @@
     <meta subject="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
-    <script src="tuitions.js"></script>
+    <!-- <script src="tuitions.js"></script> -->
     <link rel="stylesheet" href="./css/style.css">
     <title>Tuition Booking</title>
 </head>
@@ -36,6 +36,8 @@
                 <select v-model="sortBy">
                     <option value="price">Price</option>
                     <option value="subject">Subject</option>
+                    <option value="region">Region</option>
+                    <option value="spaces">Spaces</option>
                 </select>
 
                 <label>Order:</label>
@@ -80,6 +82,9 @@
                     <tr v-for="cart in cart">
                         <td v-text="cart.subject"></td>
                         <td v-text="cart.region"></td>
+                        <td style="border-width:0 ;">
+                            <button style="width:100%; height:auto;" @click="removeItem(cart)">Remove Item</button>
+                        </td>
                     </tr>
                 </table>
 
@@ -116,7 +121,7 @@
         var app1 = new Vue({
             el: "#app1",
             data:{
-                tuitions: tuitions,
+                tuitions: [],
                 cart:[],
                 showTuitionList: true,
                 showCheckout: false,
@@ -126,8 +131,18 @@
                     subject:"",
                     address:"",
                 },
-                sortBy: 'price',   // can be 'price' or 'name'
+                sortBy: 'subject',   // can be 'price' or 'name'
                 sortOrder: 'asc',
+            },
+            created(){
+                fetch("http://localhost:3000/collections/tuitions")
+                .then(response => response.json())
+                .then(res =>{
+                    app1.tuitions = res
+                    console.log(app1.tuitions)
+                })
+                .catch(error => console.log("Error: ",error))
+                .finally(()=> console.log("Fetch request completed"))
             },
             methods:{
                 addToCart(tuition){
@@ -135,10 +150,26 @@
                     tuition.availableSeats -= 1;
                 },
 
+                removeItem(tuition){
+                    const index = this.cart.indexOf(tuition);
+                    const indexTuition = this.tuitions.indexOf(tuition);
+                    //Removing Item from cart
+                    if (index !== -1) {
+                        this.cart.splice(index, 1);
+                    }
+                    //Uploading tuition availability
+                    this.tuitions[indexTuition].availableSeats += 1;
+
+                    // Return to tuition page when cart is empty
+                    if (this.cart.length <1){
+                        this.showTuitionList = true;
+                    }
+                },
+
                 showCheckoutList(){
                     if(this.showTuitionList){
                         this.showTuitionList = false;
-                    }else{
+                    }else if(this.cart.length<1){
                         this.showTuitionList = true;
                     }
                 },
@@ -149,6 +180,10 @@
                     }else{
                         this.showCheckout = true;
                     }
+                },
+
+                checkOutValidation(){
+                    
                 },
                 
                 tuitionPurchase(){
