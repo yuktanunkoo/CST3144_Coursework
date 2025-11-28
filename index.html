@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <div id="app1">
+    <div id="app">
         <!-- Navigation Bar -->
         <nav>
             <div id="searchbar">
@@ -118,8 +118,8 @@
     </div>
 
     <script>
-        var app1 = new Vue({
-            el: "#app1",
+        var app = new Vue({
+            el: "#app",
             data:{
                 tuitions: [],
                 cart:[],
@@ -138,11 +138,14 @@
                 fetch("http://localhost:3000/collections/tuitions")
                 .then(response => response.json())
                 .then(res =>{
-                    app1.tuitions = res
-                    console.log(app1.tuitions)
+                    app.tuitions = res
+                    console.log(app.tuitions)
                 })
                 .catch(error => console.log("Error: ",error))
                 .finally(()=> console.log("Fetch request completed"))
+            },
+            updated(){
+                fetch("http://localhost:3000/collections/tuitions")
             },
             methods:{
                 addToCart(tuition){
