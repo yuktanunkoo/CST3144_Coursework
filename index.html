@@ -144,15 +144,55 @@
                 .catch(error => console.log("Error: ",error))
                 .finally(()=> console.log("Fetch request completed"))
             },
-            updated(){
-                fetch("http://localhost:3000/collections/tuitions")
-            },
             methods:{
-                addToCart(tuition){
-                    this.cart.push(tuition);
+                //Add to cart method 
+                async addToCart(tuition) {
+                    // this.cart.push(tuition);
                     tuition.availableSeats -= 1;
+                   
+                    //Updated no. of available seats sent to backend
+                    var data = { availableSeats:tuition.availableSeats };
+                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition._id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+
+                        body: JSON.stringify(data),
+
+                    });
+
+                    //Tuition added to cart sent to backend
+                    var cartData = { id:tuition.id, subject:tuition.subject, price:tuition.price, region:tuition.region }
+                    const res = await fetch("http://localhost:3000/collections/cart", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+
+                        body: JSON.stringify(cartData),
+
+                    });
+
+                    //Retreive cart data from backend using fetch api
+                    fetch("http://localhost:3000/collections/cart")
+                        .then(
+                            function (response) {
+                                response.json().then(
+                                    function (json) {
+                                        //console.log(json);
+                                        // note that we used ‘app.tuitions’
+                                        // instead of 'this.tuitions’
+                                        app.cart = json;
+                                        console.log(app.cart);
+
+                                    }
+                                )
+                            }
+                        );
                 },
 
+                //Method to remove item from cart
                 removeItem(tuition){
                     const index = this.cart.indexOf(tuition);
                     const indexTuition = this.tuitions.indexOf(tuition);
@@ -172,7 +212,7 @@
                 showCheckoutList(){
                     if(this.showTuitionList){
                         this.showTuitionList = false;
-                    }else if(this.cart.length<1){
+                    }else if(this.cart.length<1 || !this.showTuitionList){
                         this.showTuitionList = true;
                     }
                 },
