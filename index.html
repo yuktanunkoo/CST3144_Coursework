@@ -70,8 +70,8 @@
 
         <!-- Checkout Page HTML -->
         <div v-else-if="!showCheckout">
-            <div id="checkOutList">
-                <h1>Checkout Page</h1>
+            <h1>Checkout Page</h1>
+            <div id="checkOutList" v-if="!cartEmpty">
                 <!-- Convert List to table -->
                 <p> Purchase List:</p>
                 <table>
@@ -87,9 +87,16 @@
                         </td>
                     </tr>
                 </table>
-
                 <button id="checkOutBtn" @click="checkOut">Checkout</button>
             </div>
+
+                <div v-else>
+                    <p> No item in cart </p>
+                    <button @click="showCheckoutList"> Return to main page </button>
+                </div>
+                
+                
+            
         </div>
         <div id="checkOut_form" v-else>
             <div style="display: block;">
