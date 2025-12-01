@@ -92,15 +92,15 @@
             </div>
         </div>
         <div id="checkOut_form" v-else>
-                <div style="display: block;">
-                    <label>Full subject:</label>
-                    <input type="text" v-model.trim="purchase.subject">
-                </div>
-                <div style="display: block;">
-                    <label>Address:</label>
-                    <input type="text" v-model.trim="purchase.address">
-                </div>
-                <button id="checkOutBtn" @click="tuitionPurchase">Confirm</button>
+            <div style="display: block;">
+                <label>Full subject:</label>
+                <input type="text" v-model.trim="purchase.subject">
+            </div>
+            <div style="display: block;">
+                <label>Address:</label>
+                <input type="text" v-model.trim="purchase.address">
+            </div>
+            <button id="checkOutBtn" @click="tuitionPurchase">Confirm</button>
 
             <div id="popUp" v-if="isPopupOpen">
                 <div id="popUpContent">
@@ -120,38 +120,38 @@
     <script>
         var app = new Vue({
             el: "#app",
-            data:{
+            data: {
                 tuitions: [],
-                cart:[],
+                cart: [],
                 showTuitionList: true,
                 showCheckout: false,
-                isPopupOpen :false,
-                popUp:[],
-                purchase:{
-                    subject:"",
-                    address:"",
+                isPopupOpen: false,
+                popUp: [],
+                purchase: {
+                    subject: "",
+                    address: "",
                 },
                 sortBy: 'subject',   // can be 'price' or 'name'
                 sortOrder: 'asc',
             },
-            created(){
+            created() {
                 fetch("http://localhost:3000/collections/tuitions")
-                .then(response => response.json())
-                .then(res =>{
-                    app.tuitions = res
-                    console.log(app.tuitions)
-                })
-                .catch(error => console.log("Error: ",error))
-                .finally(()=> console.log("Fetch request completed"))
+                    .then(response => response.json())
+                    .then(res => {
+                        app.tuitions = res
+                        console.log(app.tuitions)
+                    })
+                    .catch(error => console.log("Error: ", error))
+                    .finally(() => console.log("Fetch request completed"))
             },
-            methods:{
+            methods: {
                 //Add to cart method 
                 async addToCart(tuition) {
                     // this.cart.push(tuition);
                     tuition.availableSeats -= 1;
-                   
+
                     //Updated no. of available seats sent to backend
-                    var data = { availableSeats:tuition.availableSeats };
+                    var data = { availableSeats: tuition.availableSeats };
                     const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition._id}`, {
                         method: "PUT",
                         headers: {
@@ -163,7 +163,7 @@
                     });
 
                     //Tuition added to cart sent to backend
-                    var cartData = { id:tuition.id, subject:tuition.subject, price:tuition.price, region:tuition.region }
+                    var cartData = { id: tuition.id, subject: tuition.subject, price: tuition.price, region: tuition.region }
                     const res = await fetch("http://localhost:3000/collections/cart", {
                         method: "POST",
                         headers: {
@@ -193,65 +193,106 @@
                 },
 
                 //Method to remove item from cart
-                removeItem(tuition){
-                    const index = this.cart.indexOf(tuition);
-                    const indexTuition = this.tuitions.indexOf(tuition);
-                    //Removing Item from cart
-                    if (index !== -1) {
-                        this.cart.splice(index, 1);
-                    }
-                    //Uploading tuition availability
-                    this.tuitions[indexTuition].availableSeats += 1;
+                async removeItem(tuition) {
+                    // const index = this.cart.indexOf(tuition);
+                    // const indexTuition = this.tuitions.indexOf(tuition);
+                    // //Removing Item from cart
+                    // if (index !== -1) {
+                    //     this.cart.splice(index, 1);
+                    // }
+                    // //Uploading tuition availability
+                    // this.tuitions[indexTuition].availableSeats += 1;
 
-                    // Return to tuition page when cart is empty
-                    if (this.cart.length <1){
-                        this.showTuitionList = true;
-                    }
+                    // // Return to tuition page when cart is empty
+                    // if (this.cart.length < 1) {
+                    //     this.showTuitionList = true;
+                    // }
+                    //Deleting tuition item from cart
+                    const res = await fetch(`http://localhost:3000/collections/cart/${tuition._id}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+
+                    //Incrementing the available seats of deleted tuition item
+                    tuition.availableSeats += 1;
+
+                    //Updated no. of available seats sent to backend
+                    var data = { availableSeats: tuition.availableSeats }; 
+
+                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+
+                        body: JSON.stringify(data),
+
+                    });
+
+                    
+                    //Retreive cart data from backend using fetch api
+                    fetch("http://localhost:3000/collections/cart")
+                        .then(
+                            function (response) {
+                                response.json().then(
+                                    function (json) {
+                                        //console.log(json);
+                                        // note that we used ‘app.tuitions’
+                                        // instead of 'this.tuitions’
+                                        app.cart = json;
+                                        console.log(app.cart);
+
+                                    }
+                                )
+                            }
+                        );
                 },
 
-                showCheckoutList(){
-                    if(this.showTuitionList){
+                showCheckoutList() {
+                    if (this.showTuitionList) {
                         this.showTuitionList = false;
-                    }else if(this.cart.length<1 || !this.showTuitionList){
+                    } else if (this.cart.length < 1 || !this.showTuitionList) {
                         this.showTuitionList = true;
                     }
                 },
 
-                checkOut(){
-                    if(this.showCheckout){
+                checkOut() {
+                    if (this.showCheckout) {
                         this.showCheckout = false;
-                    }else{
+                    } else {
                         this.showCheckout = true;
                     }
                 },
 
-                checkOutValidation(){
-                    
+                checkOutValidation() {
+
                 },
-                
-                tuitionPurchase(){
+
+                tuitionPurchase() {
                     this.popUp.push(this.purchase);
-                    if(this.isPopupOpen){
+                    if (this.isPopupOpen) {
                         this.isPopupOpen = false;
-                    }else{
+                    } else {
                         this.isPopupOpen = true;
                     }
                 },
 
-                confirmPurchase(){
-                    this.cart.splice(0,this.cart.length);
+                confirmPurchase() {
+                    this.cart.splice(0, this.cart.length);
                     this.showCheckoutList();
                     this.checkOut();
                     this.tuitionPurchase();
                 },
             },
-            computed:{
-                cartCount(){
+            computed: {
+                cartCount() {
                     return this.cart.length || ""
                 },
 
-                cartEmpty(){
-                    return this.cartCount < 1 ;
+                cartEmpty() {
+                    return this.cartCount < 1;
                 },
 
                 sortedtuitions() {
@@ -271,8 +312,9 @@
                     });
                 }
             }
-            
+
         });
     </script>
 </body>
+
 </html>
