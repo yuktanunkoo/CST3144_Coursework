@@ -135,7 +135,13 @@
                 sortOrder: 'asc',
             },
             created() {
-                fetch("http://localhost:3000/collections/tuitions")
+                this.loadTuitionList();
+
+                this.loadCart();
+            },
+            methods: {
+                loadTuitionList(){
+                    fetch("http://localhost:3000/collections/tuitions")
                     .then(response => response.json())
                     .then(res => {
                         app.tuitions = res
@@ -143,8 +149,19 @@
                     })
                     .catch(error => console.log("Error: ", error))
                     .finally(() => console.log("Fetch request completed"))
-            },
-            methods: {
+                },
+
+                loadCart(){
+                    fetch("http://localhost:3000/collections/cart")
+                    .then(response => response.json())
+                    .then(res => {
+                        app.cart = res
+                        console.log(app.cart)
+                    })
+                    .catch(error => console.log("Error: ", error))
+                    .finally(() => console.log("Fetch request completed"))
+                },
+
                 //Add to cart method 
                 async addToCart(tuition) {
                     // this.cart.push(tuition);
@@ -152,75 +169,6 @@
 
                     //Updated no. of available seats sent to backend
                     var data = { availableSeats: tuition.availableSeats };
-                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition._id}`, {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-
-                        body: JSON.stringify(data),
-
-                    });
-
-                    //Tuition added to cart sent to backend
-                    var cartData = { id: tuition.id, subject: tuition.subject, price: tuition.price, region: tuition.region }
-                    const res = await fetch("http://localhost:3000/collections/cart", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-
-                        body: JSON.stringify(cartData),
-
-                    });
-
-                    //Retreive cart data from backend using fetch api
-                    fetch("http://localhost:3000/collections/cart")
-                        .then(
-                            function (response) {
-                                response.json().then(
-                                    function (json) {
-                                        //console.log(json);
-                                        // note that we used ‘app.tuitions’
-                                        // instead of 'this.tuitions’
-                                        app.cart = json;
-                                        console.log(app.cart);
-
-                                    }
-                                )
-                            }
-                        );
-                },
-
-                //Method to remove item from cart
-                async removeItem(tuition) {
-                    // const index = this.cart.indexOf(tuition);
-                    // const indexTuition = this.tuitions.indexOf(tuition);
-                    // //Removing Item from cart
-                    // if (index !== -1) {
-                    //     this.cart.splice(index, 1);
-                    // }
-                    // //Uploading tuition availability
-                    // this.tuitions[indexTuition].availableSeats += 1;
-
-                    // // Return to tuition page when cart is empty
-                    // if (this.cart.length < 1) {
-                    //     this.showTuitionList = true;
-                    // }
-                    //Deleting tuition item from cart
-                    const res = await fetch(`http://localhost:3000/collections/cart/${tuition._id}`, {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-
-                    //Incrementing the available seats of deleted tuition item
-                    tuition.availableSeats += 1;
-
-                    //Updated no. of available seats sent to backend
-                    var data = { availableSeats: tuition.availableSeats }; 
-
                     const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition.id}`, {
                         method: "PUT",
                         headers: {
@@ -231,30 +179,57 @@
 
                     });
 
-                    
-                    //Retreive cart data from backend using fetch api
-                    fetch("http://localhost:3000/collections/cart")
-                        .then(
-                            function (response) {
-                                response.json().then(
-                                    function (json) {
-                                        //console.log(json);
-                                        // note that we used ‘app.tuitions’
-                                        // instead of 'this.tuitions’
-                                        app.cart = json;
-                                        console.log(app.cart);
+                    //Tuition added to cart sent to backend
+                    var cartData = { id: tuition.id, subject: tuition.subject, price: tuition.price, region: tuition.region, availableSeats: tuition.availableSeats }
+                    const res = await fetch("http://localhost:3000/collections/cart", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
 
-                                    }
-                                )
-                            }
-                        );
+                        body: JSON.stringify(cartData),
+
+                    });
+
+                    this.loadCart();
+                },
+
+                //Method to remove item from cart
+                async removeItem(cartItem) {
+                    //Deleting tuition item from cart
+                    const res = await fetch(`http://localhost:3000/collections/cart/${cartItem._id}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+
+                    //Incrementing the available seats of deleted tuition item
+                    cartItem.availableSeats += 1;
+
+                    //Updated no. of available seats sent to backend
+                    var data = { availableSeats: cartItem.availableSeats }; 
+
+                    const response = await fetch(`http://localhost:3000/collections/tuitions/${cartItem.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+
+                        body: JSON.stringify(data),
+
+                    });
+
+                    
+                    this.loadCart();
                 },
 
                 showCheckoutList() {
                     if (this.showTuitionList) {
                         this.showTuitionList = false;
-                    } else if (this.cart.length < 1 || !this.showTuitionList) {
+                    } else if (!this.showTuitionList) {
                         this.showTuitionList = true;
+                        this.loadTuitionList();
                     }
                 },
 
@@ -288,7 +263,7 @@
             },
             computed: {
                 cartCount() {
-                    return this.cart.length || ""
+                    return this.cart.length || "";
                 },
 
                 cartEmpty() {
