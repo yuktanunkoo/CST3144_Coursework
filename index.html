@@ -87,28 +87,30 @@
                         </td>
                     </tr>
                 </table>
-                <button id="checkOutBtn" @click="checkOut">Checkout</button>
             </div>
 
                 <div v-else>
                     <p> No item in cart </p>
                     <button @click="showCheckoutList"> Return to main page </button>
                 </div>
-                
-                
+                <br>
+                <div id="checkOut_form">
+                    <h2>Checkout From</h2>
+                    <div style="display: block;">
+                        <label>Full Name:</label>
+                        <input type="text" v-model.trim="purchase.name">
+                    </div>
+                    <div style="display: block;">
+                        <label>Address:</label>
+                        <input type="text" v-model.trim="purchase.address">
+                    </div>
+                    <button id="checkOutBtn" @click="tuitionPurchase">Checkout</button>
+                </div>
+
+
             
         </div>
-        <div id="checkOut_form" v-else>
-            <div style="display: block;">
-                <label>Full Name:</label>
-                <input type="text" v-model.trim="purchase.name">
-            </div>
-            <div style="display: block;">
-                <label>Address:</label>
-                <input type="text" v-model.trim="purchase.address">
-            </div>
-            <button id="checkOutBtn" @click="tuitionPurchase">Confirm</button>
-
+        <div v-else>
             <div id="popUp" v-if="isPopupOpen">
                 <div id="popUpContent">
                     <h1>Transaction Successful</h1>
@@ -142,10 +144,16 @@
                 sortOrder: 'asc',
             },
             created() {
-                this.loadTuitionList();
-
-                this.loadCart();
+                fetch("http://localhost:3000/collections/tuitions")
+                    .then(response => response.json())
+                    .then(res => {
+                        app.tuitions = res
+                        console.log(app.tuitions)
+                    })
+                    .catch(error => console.log("Error: ", error))
+                    .finally(() => console.log("Fetch request completed"))
             },
+
             methods: {
                 loadTuitionList(){
                     fetch("http://localhost:3000/collections/tuitions")
@@ -158,25 +166,15 @@
                     .finally(() => console.log("Fetch request completed"))
                 },
 
-                loadCart(){
-                    fetch("http://localhost:3000/collections/cart")
-                    .then(response => response.json())
-                    .then(res => {
-                        app.cart = res
-                        console.log(app.cart)
-                    })
-                    .catch(error => console.log("Error: ", error))
-                    .finally(() => console.log("Fetch request completed"))
-                },
-
                 //Add to cart method 
                 async addToCart(tuition) {
-                    // this.cart.push(tuition);
+                    this.cart.push(tuition);
+
                     tuition.availableSeats -= 1;
 
                     //Updated no. of available seats sent to backend
                     var data = { availableSeats: tuition.availableSeats };
-                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition.id}`, {
+                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition._id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -185,39 +183,22 @@
                         body: JSON.stringify(data),
 
                     });
-
-                    //Tuition added to cart sent to backend
-                    var cartData = { id: tuition.id, subject: tuition.subject, price: tuition.price, region: tuition.region, availableSeats: tuition.availableSeats }
-                    const res = await fetch("http://localhost:3000/collections/cart", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-
-                        body: JSON.stringify(cartData),
-
-                    });
-
-                    this.loadCart();
                 },
 
                 //Method to remove item from cart
-                async removeItem(cartItem) {
-                    //Deleting tuition item from cart
-                    const res = await fetch(`http://localhost:3000/collections/cart/${cartItem._id}`, {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-
-                    //Incrementing the available seats of deleted tuition item
-                    cartItem.availableSeats += 1;
-
+                async removeItem(tuition) {
+                    const index = this.cart.indexOf(tuition);
+                    const indexTuition = this.tuitions.indexOf(tuition);
+                    //Removing Item from cart
+                    if (index !== -1) {
+                        this.cart.splice(index, 1);
+                    }
+                    //Uploading tuition availability
+                    tuition.availableSeats= this.tuitions[indexTuition].availableSeats + 1;
+                    console.log(tuition.availableSeats);
                     //Updated no. of available seats sent to backend
-                    var data = { availableSeats: cartItem.availableSeats }; 
-
-                    const response = await fetch(`http://localhost:3000/collections/tuitions/${cartItem.id}`, {
+                    var data = { availableSeats: tuition.availableSeats};
+                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition._id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -226,9 +207,6 @@
                         body: JSON.stringify(data),
 
                     });
-
-                    
-                    this.loadCart();
                 },
 
                 showCheckoutList() {
@@ -236,7 +214,6 @@
                         this.showTuitionList = false;
                     } else if (!this.showTuitionList) {
                         this.showTuitionList = true;
-                        this.loadTuitionList();
                     }
                 },
 
@@ -249,7 +226,21 @@
                 },
 
                 checkOutValidation() {
+                    // const phonePattern= /^\(?\d{3}\)?[-\s]?\d{3}[-\s]?\d{4}$/;
+                    // const namePattern= /^[A-Za-z]+(?: [A-Za-z]+)+$/;
+                    // const mailregExPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ ;
+                    // var purchaseDetails =this.purchase;
+                    // Validate each field
+                    const namePattern = /^[A-Za-z]+(?: [A-Za-z]+)+$/; // Full name: at least two words
+                    const addressPattern = /^[A-Za-z0-9\s,'-]{5,}$/; // Address: letters, numbers, spaces, common symbols
+                    const phonePattern = /^\(?\d{8}\)$/; // Local phone number format (no country code)
 
+                    return (
+                        namePattern.test(this.purchase.name) &&
+                        addressPattern.test(this.purchase.address) &&
+                        phonePattern.test(this.purchase.phone)
+
+                    )
                 },
 
                 tuitionPurchase() {
