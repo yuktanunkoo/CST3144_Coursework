@@ -16,7 +16,7 @@
         <!-- Navigation Bar -->
         <nav>
             <div id="searchbar">
-                <input @click="">
+                <input @input="searchTuitions" v-model.trim="searchQuerry">
                 <button><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
             <div v-if="cartEmpty">
@@ -154,6 +154,7 @@
                     phoneNum: "",
                     address: "",
                 },
+                searchQuerry: "",
                 sortBy: 'subject',   // can be 'price' or 'name'
                 sortOrder: 'asc',
             },
@@ -172,7 +173,7 @@
                 //Add to cart method 
                 async addToCart(tuition) {
                     this.cart.push(tuition);
-
+                    
                     tuition.availableSeats -= 1;
 
                     //Updated no. of available seats sent to backend
@@ -273,6 +274,30 @@
                     this.tuitionPurchase();
                     this.checkoutValid = false;
                 },
+
+                searchTuitions(){
+                    var params = this.searchQuerry;
+                    console.log(params)
+                    if (params === ""){
+                        fetch("http://localhost:3000/collections/tuitions")
+                        .then(response => response.json())
+                        .then(res => {
+                            app.tuitions = res
+                            console.log(app.tuitions)
+                        })
+                        .catch(error => console.log("Error: ", error))
+                        .finally(() => console.log("Fetch request completed"))
+                    }else{
+                        fetch(`http://localhost:3000/collections/tuitions/search?search=${params}`)
+                        .then(res => res.json())
+                        .then(res => {
+                            app.tuitions = res
+                            console.log(app.tuitions)
+                        })
+                        .catch(error => console.log("Error: ", error))
+                        .finally(() => console.log("Fetch request completed"))
+                    }
+                }
             },
             computed: {
                 cartCount() {
