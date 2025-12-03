@@ -149,7 +149,7 @@
                     name: "",
                     phoneNum: "",
                     address: "",
-                    items: this.order
+                    item:this.cart,
                 },
                 searchQuerry: "",
                 sortBy: 'subject',   // can be 'price' or 'name'
@@ -171,7 +171,7 @@
                 //Add to cart method 
                 async addToCart(tuition) {
                     this.cart.push(tuition);
-                    this.order.push("id:",tuition.id, "subject:",tuition.subject);
+                    this.purchase.item = this.cart[tuition].tuition.id;
                     tuition.availableSeats -= 1;
 
                     //Updated no. of available seats sent to backend
@@ -265,6 +265,7 @@
                         subject: "",
                         phoneNum: "",
                         address: "",
+                        item:""
                     },
                     this.showCheckoutList();
                     this.checkOut();
