@@ -235,7 +235,7 @@
                     }
                 },
 
-                checkOutValidation() {
+                checkOutValidation() { //Validating checkout forms inputs to enable checkout buttons
                     const namePattern = /^[A-Za-z]+(?: [A-Za-z]+)+$/; // Full name: at least two words
                     const addressPattern = /^[A-Za-z0-9\s,'-]{5,}$/; // Address: letters, numbers, spaces,
                     const phonePattern = /[0-9]/g; // Local phone number format
@@ -245,17 +245,17 @@
                     }else{
                         this.checkoutValid = false;
                     }
-
-                    console.log(this.checkoutValid);
                 },
 
                 async tuitionPurchase() {
-                    
+                    //Opening popup to confirm purchase
                     if (this.isPopupOpen) {
                         this.isPopupOpen = false;
                     } else {
                         this.isPopupOpen = true;
                     }
+
+                    //Posting purchase order to the backend
                     const response = await fetch(`${this.serverBasedURL}/collections/order`, {
                         method: "POST",
                         headers: {
@@ -268,13 +268,14 @@
                 },
 
                 confirmPurchase() {
+                    //Reinitialising arrays and objects
                     this.cart.splice(0, this.cart.length);
                     this.order.splice(0, this.order.length);
                     this.purchase= {
-                        subject: "",
+                        name: "",
                         phoneNum: "",
                         address: "",
-                        item:""
+                        item:"",
                     },
                     this.showCheckoutList();
                     this.checkOut();
@@ -285,7 +286,7 @@
                 searchTuitions(){
                     var params = this.searchQuerry;
                     console.log(params)
-                    if (params === ""){
+                    if (params === ""){      //if blank load the unfiltered tuition list
                         fetch(`${this.serverBasedURL}/collections/tuitions`)
                         .then(response => response.json())
                         .then(res => {
@@ -295,10 +296,11 @@
                         .catch(error => console.log("Error: ", error))
                         .finally(() => console.log("Fetch request completed"))
                     }else{
+                        // Fetch request to retreive documents matching the search parameters
                         fetch(`${this.serverBasedURL}/collections/tuitions/search?search=${params}`)
                         .then(res => res.json())
                         .then(res => {
-                            app.tuitions = res
+                            app.tuitions = res      //filtered list saved in tuitions array
                             console.log(app.tuitions)
                         })
                         .catch(error => console.log("Error: ", error))
@@ -307,27 +309,31 @@
                 }
             },
             computed: {
-                cartCount() {
+                cartCount() {           //Counting items in cart
                     return this.cart.length || "";
                 },
 
-                cartEmpty() {
+                cartEmpty() {           //returns true if the cart is empty
                     return this.cartCount < 1;
                 },
 
-                sortedtuitions() {
+                sortedtuitions() { //Sorting function
                     // Making a copy to avoid mutating the original
                     return this.tuitions.slice().sort((a, b) => {
                         let compare = 0;
 
+                        //Comparing variables
                         if (this.sortBy === 'price') {
                             compare = a.price - b.price;
-                        } else if (this.sortBy === 'subject') {
-                            // Case-insensitive comparison
+                        } else if (this.sortBy === 'subject') {     // Case-insensitive comparison
                             compare = a.subject.localeCompare(b.subject);
+                        } else if (this.sortBy === 'spaces') {
+                            compare = a.availableSeats - b.availableSeats;
+                        } else if (this.sortBy === 'region') {
+                            compare = a.region.localeCompare(b.region);
                         }
 
-                        // Reverse if descending
+                        // setting sort order
                         return this.sortOrder === 'asc' ? compare : -compare;
                     });
                 }
