@@ -157,9 +157,10 @@
                 searchQuerry: "",
                 sortBy: 'subject',   // can be 'price' or 'name'
                 sortOrder: 'asc',
+                serverBasedURL: "https://cst3144-server.onrender.com"
             },
             created() {
-                fetch("http://localhost:3000/collections/tuitions")
+                fetch("https://cst3144-server.onrender.com/collections/tuitions")
                     .then(response => response.json())
                     .then(res => {
                         app.tuitions = res
