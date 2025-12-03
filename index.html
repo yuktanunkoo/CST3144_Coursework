@@ -171,7 +171,7 @@
                 //Add to cart method 
                 async addToCart(tuition) {
                     this.cart.push(tuition);
-                    this.purchase.item = this.cart[tuition].tuition.id;
+                    this.purchase.item = this.cart;
                     tuition.availableSeats -= 1;
 
                     //Updated no. of available seats sent to backend
