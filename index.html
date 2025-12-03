@@ -160,7 +160,7 @@
                 serverBasedURL: "https://cst3144-server.onrender.com"
             },
             created() {
-                fetch(`${serverBasedURL}/collections/tuitions`)
+                fetch(`${this.serverBasedURL}/collections/tuitions`)
                     .then(response => response.json())
                     .then(res => {
                         app.tuitions = res
@@ -179,7 +179,7 @@
 
                     //Updated no. of available seats sent to backend
                     var data = { availableSeats: tuition.availableSeats };
-                    const response = await fetch(`${serverBasedURL}/collections/tuitions/${tuition._id}`, {
+                    const response = await fetch(`${this.serverBasedURL}/collections/tuitions/${tuition._id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -203,7 +203,7 @@
                     console.log(tuition.availableSeats);
                     //Updated no. of available seats sent to backend
                     var data = { availableSeats: tuition.availableSeats};
-                    const response = await fetch(`${serverBasedURL}/collections/tuitions/${tuition._id}`, {
+                    const response = await fetch(`${this.serverBasedURL}/collections/tuitions/${tuition._id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -252,7 +252,7 @@
                     } else {
                         this.isPopupOpen = true;
                     }
-                    const response = await fetch(`${serverBasedURL}/collections/order`, {
+                    const response = await fetch(`${this.serverBasedURL}/collections/order`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -280,7 +280,7 @@
                     var params = this.searchQuerry;
                     console.log(params)
                     if (params === ""){
-                        fetch(`${serverBasedURL}/collections/tuitions`)
+                        fetch(`${this.serverBasedURL}/collections/tuitions`)
                         .then(response => response.json())
                         .then(res => {
                             app.tuitions = res
@@ -289,7 +289,7 @@
                         .catch(error => console.log("Error: ", error))
                         .finally(() => console.log("Fetch request completed"))
                     }else{
-                        fetch(`${serverBasedURL}/collections/tuitions/search?search=${params}`)
+                        fetch(`${this.serverBasedURL}/collections/tuitions/search?search=${params}`)
                         .then(res => res.json())
                         .then(res => {
                             app.tuitions = res
