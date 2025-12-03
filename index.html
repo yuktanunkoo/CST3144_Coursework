@@ -160,7 +160,7 @@
                 serverBasedURL: "https://cst3144-server.onrender.com"
             },
             created() {
-                fetch("https://cst3144-server.onrender.com/collections/tuitions")
+                fetch(`${serverBasedURL}/collections/tuitions`)
                     .then(response => response.json())
                     .then(res => {
                         app.tuitions = res
@@ -179,7 +179,7 @@
 
                     //Updated no. of available seats sent to backend
                     var data = { availableSeats: tuition.availableSeats };
-                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition._id}`, {
+                    const response = await fetch(`${serverBasedURL}/collections/tuitions/${tuition._id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -203,7 +203,7 @@
                     console.log(tuition.availableSeats);
                     //Updated no. of available seats sent to backend
                     var data = { availableSeats: tuition.availableSeats};
-                    const response = await fetch(`http://localhost:3000/collections/tuitions/${tuition._id}`, {
+                    const response = await fetch(`${serverBasedURL}/collections/tuitions/${tuition._id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
