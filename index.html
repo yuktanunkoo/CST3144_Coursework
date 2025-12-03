@@ -170,8 +170,14 @@
             methods: {
                 //Add to cart method 
                 async addToCart(tuition) {
+                    //Storing tuition in cart array
                     this.cart.push(tuition);
-                    this.purchase.item = this.cart;
+
+                    //Adding tuition id in purchase object
+                    this.order.push(tuition.id)
+                    this.purchase.item = this.order;
+
+                    //Reducing number of seats
                     tuition.availableSeats -= 1;
 
                     //Updated no. of available seats sent to backend
@@ -190,10 +196,12 @@
                 //Method to remove item from cart
                 async removeItem(tuition) {
                     const index = this.cart.indexOf(tuition);
+                    const orderIndex = this.order.indexOf(tuition.id);
                     const indexTuition = this.tuitions.indexOf(tuition);
-                    //Removing Item from cart
+                    //Removing Item from cart and purchase
                     if (index !== -1) {
                         this.cart.splice(index, 1);
+                        this.order.splice(orderIndex, 1);
                     }
                     //Uploading tuition availability
                     tuition.availableSeats= this.tuitions[indexTuition].availableSeats + 1;
