@@ -124,10 +124,6 @@
             <div id="popUp" v-if="isPopupOpen">
                 <div id="popUpContent">
                     <h1>Transaction Successful</h1>
-                    <p v-text>No. of items purchased= {{cartCount}} </p>
-                    <ul v-for="cart in cart">
-                        <li>{{cart.subject}} at {{cart.region}}</li>
-                    </ul>
                     <button id="checkOutBtn" @click="confirmPurchase">Confirm</button>
                 </div>
             </div>
@@ -153,6 +149,7 @@
                     name: "",
                     phoneNum: "",
                     address: "",
+                    items: this.order
                 },
                 searchQuerry: "",
                 sortBy: 'subject',   // can be 'price' or 'name'
@@ -174,7 +171,7 @@
                 //Add to cart method 
                 async addToCart(tuition) {
                     this.cart.push(tuition);
-                    
+                    this.order.push("id:",tuition.id, "subject:",tuition.subject);
                     tuition.availableSeats -= 1;
 
                     //Updated no. of available seats sent to backend
@@ -232,8 +229,8 @@
 
                 checkOutValidation() {
                     const namePattern = /^[A-Za-z]+(?: [A-Za-z]+)+$/; // Full name: at least two words
-                    const addressPattern = /^[A-Za-z0-9\s,'-]{5,}$/; // Address: letters, numbers, spaces, common symbols
-                    const phonePattern = /[0-9]/g; // Local phone number format (no country code)
+                    const addressPattern = /^[A-Za-z0-9\s,'-]{5,}$/; // Address: letters, numbers, spaces,
+                    const phonePattern = /[0-9]/g; // Local phone number format
 
                     if (this.purchase.name.match(namePattern) && this.purchase.address.match(addressPattern) && this.purchase.phoneNum.match(phonePattern)){
                         this.checkoutValid = true;
@@ -245,8 +242,7 @@
                 },
 
                 async tuitionPurchase() {
-                    this.order.push(this.purchase);
-                    console.log(this.order, this.order.length);
+                    
                     if (this.isPopupOpen) {
                         this.isPopupOpen = false;
                     } else {
@@ -258,7 +254,7 @@
                             "Content-Type": "application/json",
                         },
 
-                        body: JSON.stringify(this.purchase),
+                        body: JSON.stringify(this.purchase)
 
                     });
                 },
@@ -272,7 +268,7 @@
                     },
                     this.showCheckoutList();
                     this.checkOut();
-                    this.tuitionPurchase();
+                    this.isPopupOpen = false;
                     this.checkoutValid = false;
                 },
 
