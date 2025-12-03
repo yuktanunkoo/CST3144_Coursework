@@ -252,7 +252,7 @@
                     } else {
                         this.isPopupOpen = true;
                     }
-                    const response = await fetch(`http://localhost:3000/collections/order`, {
+                    const response = await fetch(`${serverBasedURL}/collections/order`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -280,7 +280,7 @@
                     var params = this.searchQuerry;
                     console.log(params)
                     if (params === ""){
-                        fetch("http://localhost:3000/collections/tuitions")
+                        fetch(`${serverBasedURL}/collections/tuitions`)
                         .then(response => response.json())
                         .then(res => {
                             app.tuitions = res
