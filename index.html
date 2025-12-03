@@ -289,7 +289,7 @@
                         .catch(error => console.log("Error: ", error))
                         .finally(() => console.log("Fetch request completed"))
                     }else{
-                        fetch(`http://localhost:3000/collections/tuitions/search?search=${params}`)
+                        fetch(`${serverBasedURL}/collections/tuitions/search?search=${params}`)
                         .then(res => res.json())
                         .then(res => {
                             app.tuitions = res
