@@ -69,7 +69,7 @@
         </div>
 
         <!-- Checkout Page HTML -->
-        <div v-else-if="!showCheckout">
+        <div v-else>
             <h1>Checkout Page</h1>
             <div id="checkOutList" v-if="!cartEmpty">
                 <!-- Convert List to table -->
@@ -94,23 +94,33 @@
                     <button @click="showCheckoutList"> Return to main page </button>
                 </div>
                 <br>
-                <div id="checkOut_form">
+                <div id="checkOut_form" @input="checkOutValidation">
                     <h2>Checkout From</h2>
                     <div style="display: block;">
                         <label>Full Name:</label>
                         <input type="text" v-model.trim="purchase.name">
+                        <p>{{purchase.name}}</p>
+                    </div>
+                    <div style="display: block;">
+                        <label>Phone Number:</label>
+                        <input type="text" v-model.trim="purchase.phoneNum">
+                        <p>{{purchase.phoneNum}}</p>
                     </div>
                     <div style="display: block;">
                         <label>Address:</label>
                         <input type="text" v-model.trim="purchase.address">
+                        <p>{{purchase.address}}</p>
                     </div>
-                    <button id="checkOutBtn" @click="tuitionPurchase">Checkout</button>
+                    <div v-if="!checkoutValid">
+                        <button id="checkOutBtn" disabled>Checkout</button>
+                    </div>
+                    <div v-else>
+                        <button id="checkOutBtn" @click="tuitionPurchase">Checkout</button>
+                    </div>
+                    
                 </div>
 
-
-            
-        </div>
-        <div v-else>
+            <!-- Purchase confirmation Popup HTML -->
             <div id="popUp" v-if="isPopupOpen">
                 <div id="popUpContent">
                     <h1>Transaction Successful</h1>
@@ -121,8 +131,10 @@
                     <button id="checkOutBtn" @click="confirmPurchase">Confirm</button>
                 </div>
             </div>
+            
         </div>
-        <!-- Purchase confirmation Popup HTML -->
+        
+        
 
     </div>
 
@@ -135,9 +147,11 @@
                 showTuitionList: true,
                 showCheckout: false,
                 isPopupOpen: false,
-                popUp: [],
+                checkoutValid:false,
+                order: [],
                 purchase: {
-                    subject: "",
+                    name: "",
+                    phoneNum: "",
                     address: "",
                 },
                 sortBy: 'subject',   // can be 'price' or 'name'
@@ -155,17 +169,6 @@
             },
 
             methods: {
-                loadTuitionList(){
-                    fetch("http://localhost:3000/collections/tuitions")
-                    .then(response => response.json())
-                    .then(res => {
-                        app.tuitions = res
-                        console.log(app.tuitions)
-                    })
-                    .catch(error => console.log("Error: ", error))
-                    .finally(() => console.log("Fetch request completed"))
-                },
-
                 //Add to cart method 
                 async addToCart(tuition) {
                     this.cart.push(tuition);
@@ -226,37 +229,49 @@
                 },
 
                 checkOutValidation() {
-                    // const phonePattern= /^\(?\d{3}\)?[-\s]?\d{3}[-\s]?\d{4}$/;
-                    // const namePattern= /^[A-Za-z]+(?: [A-Za-z]+)+$/;
-                    // const mailregExPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ ;
-                    // var purchaseDetails =this.purchase;
-                    // Validate each field
                     const namePattern = /^[A-Za-z]+(?: [A-Za-z]+)+$/; // Full name: at least two words
                     const addressPattern = /^[A-Za-z0-9\s,'-]{5,}$/; // Address: letters, numbers, spaces, common symbols
-                    const phonePattern = /^\(?\d{8}\)$/; // Local phone number format (no country code)
+                    const phonePattern = /[0-9]/g; // Local phone number format (no country code)
 
-                    return (
-                        namePattern.test(this.purchase.name) &&
-                        addressPattern.test(this.purchase.address) &&
-                        phonePattern.test(this.purchase.phone)
+                    if (this.purchase.name.match(namePattern) && this.purchase.address.match(addressPattern) && this.purchase.phoneNum.match(phonePattern)){
+                        this.checkoutValid = true;
+                    }else{
+                        this.checkoutValid = false;
+                    }
 
-                    )
+                    console.log(this.checkoutValid);
                 },
 
-                tuitionPurchase() {
-                    this.popUp.push(this.purchase);
+                async tuitionPurchase() {
+                    this.order.push(this.purchase);
+                    console.log(this.order, this.order.length);
                     if (this.isPopupOpen) {
                         this.isPopupOpen = false;
                     } else {
                         this.isPopupOpen = true;
                     }
+                    const response = await fetch(`http://localhost:3000/collections/order`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+
+                        body: JSON.stringify(this.purchase),
+
+                    });
                 },
 
                 confirmPurchase() {
                     this.cart.splice(0, this.cart.length);
+                    this.purchase= {
+                        subject: "",
+                        phoneNum: "",
+                        address: "",
+                    },
                     this.showCheckoutList();
                     this.checkOut();
                     this.tuitionPurchase();
+                    this.checkoutValid = false;
                 },
             },
             computed: {

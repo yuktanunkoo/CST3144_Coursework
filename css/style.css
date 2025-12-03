@@ -71,11 +71,6 @@ option {
     border-color: white;
 }
 
-#checkOutBtn {
-    padding: 10px;
-    width: 180px;
-}
-
 #tuitionImg {
     width: 80px;
 }
@@ -109,6 +104,19 @@ td {
 #checkOut_form {
     display: inline-block;
     position: sticky
+}
+
+#checkOutBtn {
+    padding: 10px;
+    width: 180px;
+}
+
+
+#checkOutBtn:disabled{
+    color: #7b7a7a;
+    background-color: #ddd;
+    cursor: default;
+    border-color: white; 
 }
 
 
